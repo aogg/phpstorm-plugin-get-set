@@ -14,7 +14,8 @@ repositories {
 intellij {
     version.set("2023.3")
     type.set("PS") // PhpStorm
-    plugins.set(listOf("com.jetbrains.php:233.11727.19"))
+    // 依赖内置 PHP 插件以获得 PSI 类型
+    plugins.set(listOf("com.jetbrains.php"))
 }
 
 tasks {

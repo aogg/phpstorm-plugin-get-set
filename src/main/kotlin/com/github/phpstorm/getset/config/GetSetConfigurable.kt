@@ -72,10 +72,8 @@ class GetSetConfigurable : Configurable {
      * 创建表格模型
      */
     private fun createTableModel(items: List<String>): DefaultTableModel {
-        val model = DefaultTableModel(arrayOf("值"), 0) {
-            override fun isCellEditable(row: Int, column: Int): Boolean {
-                return column == 0
-            }
+        val model = object : DefaultTableModel(arrayOf("值"), 0) {
+            override fun isCellEditable(row: Int, column: Int): Boolean = column == 0
         }
         
         items.forEach { item ->
@@ -141,7 +139,8 @@ class GetSetConfigurable : Configurable {
         val configService = GetSetConfigService.getInstance()
         val currentConfig = configService.getConfig()
         
-        if (enabledCheckBox!!.isSelected != currentConfig.enabled) {
+        val enabledSelected = enabledCheckBox?.isSelected ?: false
+        if (enabledSelected != currentConfig.enabled) {
             return true
         }
         

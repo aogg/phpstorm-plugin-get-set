@@ -2,10 +2,6 @@ package com.github.phpstorm.getset.highlight
 
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors
 import com.intellij.openapi.editor.colors.TextAttributesKey
-import com.intellij.openapi.options.colors.AttributesDescriptor
-import com.intellij.openapi.options.colors.ColorDescriptor
-import com.intellij.openapi.options.colors.ColorSettingsPage
-import java.awt.Color
 
 /**
  * Get/Set 高亮器
@@ -18,7 +14,7 @@ object GetSetHighlighter {
      */
     val GETTER_METHOD_KEY = TextAttributesKey.createTextAttributesKey(
         "GETSET_GETTER_METHOD",
-        DefaultLanguageHighlighterColors.METHOD_NAME
+        DefaultLanguageHighlighterColors.FUNCTION_DECLARATION
     )
     
     /**
@@ -26,7 +22,7 @@ object GetSetHighlighter {
      */
     val SETTER_METHOD_KEY = TextAttributesKey.createTextAttributesKey(
         "GETSET_SETTER_METHOD",
-        DefaultLanguageHighlighterColors.METHOD_NAME
+        DefaultLanguageHighlighterColors.FUNCTION_DECLARATION
     )
     
     /**

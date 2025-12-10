@@ -1,6 +1,5 @@
 package com.github.phpstorm.getset.highlight
 
-import com.github.phpstorm.getset.config.GetSetConfig
 import com.github.phpstorm.getset.config.GetSetConfigService
 import com.jetbrains.php.lang.psi.elements.Method
 
