@@ -1,0 +1,52 @@
+<idea-plugin>
+    <id>com.github.phpstorm.get-set-highlighter</id>
+    <name>Get/Set Method Highlighter</name>
+    <version>1.0.0</version>
+    <vendor email="support@example.com" url="https://github.com">GitHub</vendor>
+
+    <description><![CDATA[
+    自动高亮类属性的 getter 和 setter 方法。
+    
+    功能特性：
+    - 自动识别并高亮 getter/setter 方法
+    - 支持自定义多个前缀和后缀
+    - 可配置的高亮样式
+    - 实时更新，无需重启 IDE
+    ]]></description>
+
+    <change-notes><![CDATA[
+    1.0.0 - 初始版本
+    - 支持自动高亮 getter/setter 方法
+    - 支持自定义前缀和后缀配置
+    ]]></change-notes>
+
+    <!-- 支持的 IDE 版本 -->
+    <idea-version since-build="233" until-build="241.*"/>
+
+    <!-- 依赖的插件 -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.jetbrains.php</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- 注册配置页面 -->
+        <applicationConfigurable
+                parentId="editor"
+                instance="com.github.phpstorm.getset.config.GetSetConfigurable"
+                id="com.github.phpstorm.getset.config"
+                displayName="Get/Set Highlighter"
+                nonDefaultProject="true"/>
+
+        <!-- 注册注解器 -->
+        <annotator language="PHP" implementationClass="com.github.phpstorm.getset.highlight.GetSetAnnotator"/>
+    </extensions>
+
+    <applicationService>
+        <serviceInterface>com.github.phpstorm.getset.config.GetSetConfigService</serviceInterface>
+        <serviceImplementation>com.github.phpstorm.getset.config.GetSetConfigService</serviceImplementation>
+    </applicationService>
+
+    <actions>
+        <!-- 可以在这里添加菜单项或快捷键 -->
+    </actions>
+</idea-plugin>
+
