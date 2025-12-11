@@ -1,10 +1,10 @@
 package com.github.phpstorm.getset.highlight
 
 import com.github.phpstorm.getset.config.GetSetConfigService
+import com.github.phpstorm.getset.util.ProjectLogger
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
@@ -17,10 +17,6 @@ import java.awt.Font
  * 识别并高亮 getter/setter 方法
  */
 class GetSetAnnotator : Annotator {
-    
-    companion object {
-        private val logger = Logger.getInstance(GetSetAnnotator::class.java)
-    }
     
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         // 只处理 PHP 方法
@@ -56,7 +52,7 @@ class GetSetAnnotator : Annotator {
                     .enforcedTextAttributes(textAttributes)
                     .create()
                 
-                logger.debug("高亮创建: GETTER 方法 ${element.name} 在 ${element.containingFile?.name}")
+                ProjectLogger.info(GetSetAnnotator::class.java, "高亮创建: GETTER 方法 ${element.name} 在 ${element.containingFile?.name}")
             }
             
             GetSetMethodDetector.MethodType.SETTER -> {
@@ -75,7 +71,7 @@ class GetSetAnnotator : Annotator {
                     .enforcedTextAttributes(textAttributes)
                     .create()
                 
-                logger.debug("高亮创建: SETTER 方法 ${element.name} 在 ${element.containingFile?.name}")
+                ProjectLogger.info(GetSetAnnotator::class.java, "高亮创建: SETTER 方法 ${element.name} 在 ${element.containingFile?.name}")
             }
             
             GetSetMethodDetector.MethodType.NONE -> {

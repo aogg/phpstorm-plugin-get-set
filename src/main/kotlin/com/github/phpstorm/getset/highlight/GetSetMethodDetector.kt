@@ -1,7 +1,7 @@
 package com.github.phpstorm.getset.highlight
 
 import com.github.phpstorm.getset.config.GetSetConfigService
-import com.intellij.openapi.diagnostic.Logger
+import com.github.phpstorm.getset.util.ProjectLogger
 import com.jetbrains.php.lang.psi.elements.Method
 
 /**
@@ -9,8 +9,6 @@ import com.jetbrains.php.lang.psi.elements.Method
  * 根据配置识别方法是否为 getter 或 setter
  */
 object GetSetMethodDetector {
-    
-    private val logger = Logger.getInstance(GetSetMethodDetector::class.java)
     
     /**
      * 检测方法类型
@@ -31,12 +29,12 @@ object GetSetMethodDetector {
         val config = configService.getConfig()
         
         if (config.isGetterMethod(methodName)) {
-            logger.debug("方法检测: $methodName -> GETTER")
+            ProjectLogger.info(GetSetMethodDetector::class.java, "方法检测: $methodName -> GETTER")
             return MethodType.GETTER
         }
         
         if (config.isSetterMethod(methodName)) {
-            logger.debug("方法检测: $methodName -> SETTER")
+            ProjectLogger.info(GetSetMethodDetector::class.java, "方法检测: $methodName -> SETTER")
             return MethodType.SETTER
         }
         

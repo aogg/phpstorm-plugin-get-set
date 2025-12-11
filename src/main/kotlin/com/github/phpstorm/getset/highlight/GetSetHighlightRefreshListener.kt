@@ -1,9 +1,9 @@
 package com.github.phpstorm.getset.highlight
 
 import com.github.phpstorm.getset.config.GetSetConfigService
+import com.github.phpstorm.getset.util.ProjectLogger
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
@@ -26,7 +26,6 @@ import java.util.concurrent.atomic.AtomicLong
 class GetSetHighlightRefreshListener : FileEditorManagerListener, FileDocumentManagerListener, DocumentListener {
     
     companion object {
-        private val logger = Logger.getInstance(GetSetHighlightRefreshListener::class.java)
         // 防抖延迟时间（毫秒）
         private const val DEBOUNCE_DELAY_MS = 300L
     }
@@ -43,13 +42,13 @@ class GetSetHighlightRefreshListener : FileEditorManagerListener, FileDocumentMa
             return
         }
         
-        logger.debug("文件打开: ${file.path}")
+        ProjectLogger.info(GetSetHighlightRefreshListener::class.java, "文件打开: ${file.path}")
         
         // 检查配置是否启用
         val configService = GetSetConfigService.getInstance()
         val config = configService.getConfig()
         if (!config.enabled) {
-            logger.debug("高亮功能已禁用，跳过刷新")
+            ProjectLogger.debug(GetSetHighlightRefreshListener::class.java, "高亮功能已禁用，跳过刷新")
             return
         }
         
@@ -78,7 +77,7 @@ class GetSetHighlightRefreshListener : FileEditorManagerListener, FileDocumentMa
             return
         }
         
-        logger.debug("文档修改: ${file.path}")
+        ProjectLogger.info(GetSetHighlightRefreshListener::class.java, "文档修改: ${file.path}")
         
         // 检查配置是否启用
         val configService = GetSetConfigService.getInstance()
@@ -135,15 +134,15 @@ class GetSetHighlightRefreshListener : FileEditorManagerListener, FileDocumentMa
     }
     
     /**
-     * 文档保存前触发
-     */
-    /**
-     * DocumentListener 接口方法（未使用）
+     * DocumentListener 接口方法（在文档变化前触发，不需要处理）
      */
     override fun beforeDocumentChange(event: DocumentEvent) {
         // 不需要处理
     }
     
+    /**
+     * 文档保存前触发
+     */
     override fun beforeDocumentSaving(document: Document) {
         val fileDocumentManager = FileDocumentManager.getInstance()
         val file = fileDocumentManager.getFile(document) ?: return
@@ -153,7 +152,7 @@ class GetSetHighlightRefreshListener : FileEditorManagerListener, FileDocumentMa
             return
         }
         
-        logger.debug("文档保存: ${file.path}")
+        ProjectLogger.info(GetSetHighlightRefreshListener::class.java, "文档保存: ${file.path}")
         
         // 检查配置是否启用
         val configService = GetSetConfigService.getInstance()
@@ -197,24 +196,24 @@ class GetSetHighlightRefreshListener : FileEditorManagerListener, FileDocumentMa
         try {
             // 获取文档
             val document = FileDocumentManager.getInstance().getDocument(file) ?: run {
-                logger.debug("无法获取文档: ${file.path}")
+                ProjectLogger.warn(GetSetHighlightRefreshListener::class.java, "无法获取文档: ${file.path}")
                 return
             }
             
             // 获取 PSI 文件
             val psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document) ?: run {
-                logger.debug("无法获取 PSI 文件: ${file.path}")
+                ProjectLogger.warn(GetSetHighlightRefreshListener::class.java, "无法获取 PSI 文件: ${file.path}")
                 return
             }
             
-            logger.debug("刷新高亮: ${file.path}")
+            ProjectLogger.info(GetSetHighlightRefreshListener::class.java, "刷新高亮: ${file.path}")
             
             // 针对特定文件重新分析
             val daemonCodeAnalyzer = DaemonCodeAnalyzer.getInstance(project)
             daemonCodeAnalyzer.restart(psiFile)
             
         } catch (e: Exception) {
-            logger.warn("刷新高亮失败: ${file.path}", e)
+            ProjectLogger.warn(GetSetHighlightRefreshListener::class.java, "刷新高亮失败: ${file.path}", e)
         }
     }
 }

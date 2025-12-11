@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.github.phpstorm.get-set-highlighter</id>
     <name>Get/Set Method Highlighter</name>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <vendor email="support@example.com" url="https://github.com">GitHub</vendor>
 
     <description><![CDATA[
@@ -17,6 +17,11 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    1.0.4 - 项目目录日志功能
+    - 日志现在存储在项目目录的 .idea/plugin/Get-Set-Method-Highlighter/logs/ 目录
+    - 日志文件按日期命名，方便查看和归档
+    - 如果无法创建项目日志目录，自动降级到系统日志
+    
     1.0.3 - 修复文件修改和打开时的高亮问题
     - 添加文档修改监听，文件修改时立即刷新高亮
     - 优化文件打开时的高亮刷新机制

@@ -1,8 +1,8 @@
 package com.github.phpstorm.getset.highlight
 
+import com.github.phpstorm.getset.util.ProjectLogger
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.BaseComponent
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.EditorFactory
 
 /**
@@ -11,14 +11,10 @@ import com.intellij.openapi.editor.EditorFactory
  */
 class GetSetHighlightComponent : BaseComponent {
     
-    companion object {
-        private val logger = Logger.getInstance(GetSetHighlightComponent::class.java)
-    }
-    
     private var listener: GetSetHighlightRefreshListener? = null
     
     override fun initComponent() {
-        logger.debug("初始化 GetSetHighlightComponent")
+        ProjectLogger.info(GetSetHighlightComponent::class.java, "初始化 GetSetHighlightComponent")
         
         // 创建监听器实例
         listener = GetSetHighlightRefreshListener()
@@ -27,11 +23,11 @@ class GetSetHighlightComponent : BaseComponent {
         val editorFactory = EditorFactory.getInstance()
         editorFactory.eventMulticaster.addDocumentListener(listener!!, ApplicationManager.getApplication())
         
-        logger.debug("DocumentListener 已注册")
+        ProjectLogger.info(GetSetHighlightComponent::class.java, "DocumentListener 已注册")
     }
     
     override fun disposeComponent() {
-        logger.debug("销毁 GetSetHighlightComponent")
+        ProjectLogger.debug(GetSetHighlightComponent::class.java, "销毁 GetSetHighlightComponent")
         listener?.let {
             val editorFactory = EditorFactory.getInstance()
             editorFactory.eventMulticaster.removeDocumentListener(it)
