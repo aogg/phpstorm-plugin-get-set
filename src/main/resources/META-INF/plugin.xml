@@ -21,7 +21,7 @@
     ]]></change-notes>
 
     <!-- 支持的 IDE 版本 -->
-    <idea-version since-build="233" until-build="241.*"/>
+    <idea-version since-build="233" until-build="251.*"/>
 
     <!-- 依赖的插件 -->
     <depends>com.intellij.modules.platform</depends>
@@ -38,12 +38,12 @@
 
         <!-- 注册注解器 -->
         <annotator language="PHP" implementationClass="com.github.phpstorm.getset.highlight.GetSetAnnotator"/>
+        
+        <!-- 注册应用级服务 -->
+        <applicationService
+                serviceInterface="com.github.phpstorm.getset.config.GetSetConfigService"
+                serviceImplementation="com.github.phpstorm.getset.config.GetSetConfigService"/>
     </extensions>
-
-    <applicationService>
-        <serviceInterface>com.github.phpstorm.getset.config.GetSetConfigService</serviceInterface>
-        <serviceImplementation>com.github.phpstorm.getset.config.GetSetConfigService</serviceImplementation>
-    </applicationService>
 
     <actions>
         <!-- 可以在这里添加菜单项或快捷键 -->

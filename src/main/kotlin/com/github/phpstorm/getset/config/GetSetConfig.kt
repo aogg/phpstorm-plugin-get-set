@@ -5,24 +5,14 @@ package com.github.phpstorm.getset.config
  */
 data class GetSetConfig(
     /**
-     * Getter 方法前缀列表（如：get, is, has）
+     * Getter 方法通配模式列表（支持 *，例如：get*、get*Attr、getCache*）
      */
-    val getterPrefixes: MutableList<String> = mutableListOf("get", "is", "has"),
+    val getterPatterns: MutableList<String> = mutableListOf("get*", "is*", "has*"),
     
     /**
-     * Setter 方法前缀列表（如：set）
+     * Setter 方法通配模式列表（支持 *，例如：set*）
      */
-    val setterPrefixes: MutableList<String> = mutableListOf("set"),
-    
-    /**
-     * Getter 方法后缀列表
-     */
-    val getterSuffixes: MutableList<String> = mutableListOf(),
-    
-    /**
-     * Setter 方法后缀列表
-     */
-    val setterSuffixes: MutableList<String> = mutableListOf(),
+    val setterPatterns: MutableList<String> = mutableListOf("set*"),
     
     /**
      * 是否启用高亮
@@ -44,20 +34,7 @@ data class GetSetConfig(
     fun isGetterMethod(methodName: String): Boolean {
         if (!enabled) return false
         
-        // 检查前缀
-        val matchesPrefix = getterPrefixes.any { prefix ->
-            methodName.startsWith(prefix, ignoreCase = true) &&
-            methodName.length > prefix.length &&
-            methodName[prefix.length].isUpperCase()
-        }
-        
-        // 检查后缀
-        val matchesSuffix = getterSuffixes.isEmpty() || getterSuffixes.any { suffix ->
-            methodName.endsWith(suffix, ignoreCase = true) &&
-            methodName.length > suffix.length
-        }
-        
-        return matchesPrefix && matchesSuffix
+        return matchesPattern(methodName, getterPatterns)
     }
     
     /**
@@ -66,20 +43,22 @@ data class GetSetConfig(
     fun isSetterMethod(methodName: String): Boolean {
         if (!enabled) return false
         
-        // 检查前缀
-        val matchesPrefix = setterPrefixes.any { prefix ->
-            methodName.startsWith(prefix, ignoreCase = true) &&
-            methodName.length > prefix.length &&
-            methodName[prefix.length].isUpperCase()
-        }
+        return matchesPattern(methodName, setterPatterns)
+    }
+    
+    /**
+     * 通用通配符匹配：支持 * 匹配任意长度字符（大小写不敏感）
+     */
+    private fun matchesPattern(methodName: String, patterns: List<String>): Boolean {
+        if (patterns.isEmpty()) return false
         
-        // 检查后缀
-        val matchesSuffix = setterSuffixes.isEmpty() || setterSuffixes.any { suffix ->
-            methodName.endsWith(suffix, ignoreCase = true) &&
-            methodName.length > suffix.length
+        return patterns.any { pattern ->
+            val regex = pattern
+                .replace(".", "\\.")
+                .replace("*", ".*")
+                .toRegex(RegexOption.IGNORE_CASE)
+            regex.matches(methodName)
         }
-        
-        return matchesPrefix && matchesSuffix
     }
 }
 

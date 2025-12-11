@@ -22,10 +22,8 @@ class GetSetConfigService : PersistentStateComponent<GetSetConfigService> {
      */
     fun getConfig(): GetSetConfig {
         return config.copy(
-            getterPrefixes = config.getterPrefixes.toMutableList(),
-            setterPrefixes = config.setterPrefixes.toMutableList(),
-            getterSuffixes = config.getterSuffixes.toMutableList(),
-            setterSuffixes = config.setterSuffixes.toMutableList()
+            getterPatterns = config.getterPatterns.toMutableList(),
+            setterPatterns = config.setterPatterns.toMutableList()
         )
     }
     
@@ -34,10 +32,8 @@ class GetSetConfigService : PersistentStateComponent<GetSetConfigService> {
      */
     fun updateConfig(newConfig: GetSetConfig) {
         config = newConfig.copy(
-            getterPrefixes = newConfig.getterPrefixes.toMutableList(),
-            setterPrefixes = newConfig.setterPrefixes.toMutableList(),
-            getterSuffixes = newConfig.getterSuffixes.toMutableList(),
-            setterSuffixes = newConfig.setterSuffixes.toMutableList()
+            getterPatterns = newConfig.getterPatterns.toMutableList(),
+            setterPatterns = newConfig.setterPatterns.toMutableList()
         )
     }
     
@@ -60,35 +56,19 @@ class GetSetConfigService : PersistentStateComponent<GetSetConfigService> {
     }
     
     // 序列化配置数据
-    var getterPrefixes: String
-        get() = config.getterPrefixes.joinToString(",")
+    var getterPatterns: String
+        get() = config.getterPatterns.joinToString(",")
         set(value) {
             config = config.copy(
-                getterPrefixes = if (value.isBlank()) mutableListOf() else value.split(",").map { it.trim() }.filter { it.isNotEmpty() }.toMutableList()
+                getterPatterns = if (value.isBlank()) mutableListOf() else value.split(",").map { it.trim() }.filter { it.isNotEmpty() }.toMutableList()
             )
         }
     
-    var setterPrefixes: String
-        get() = config.setterPrefixes.joinToString(",")
+    var setterPatterns: String
+        get() = config.setterPatterns.joinToString(",")
         set(value) {
             config = config.copy(
-                setterPrefixes = if (value.isBlank()) mutableListOf() else value.split(",").map { it.trim() }.filter { it.isNotEmpty() }.toMutableList()
-            )
-        }
-    
-    var getterSuffixes: String
-        get() = config.getterSuffixes.joinToString(",")
-        set(value) {
-            config = config.copy(
-                getterSuffixes = if (value.isBlank()) mutableListOf() else value.split(",").map { it.trim() }.filter { it.isNotEmpty() }.toMutableList()
-            )
-        }
-    
-    var setterSuffixes: String
-        get() = config.setterSuffixes.joinToString(",")
-        set(value) {
-            config = config.copy(
-                setterSuffixes = if (value.isBlank()) mutableListOf() else value.split(",").map { it.trim() }.filter { it.isNotEmpty() }.toMutableList()
+                setterPatterns = if (value.isBlank()) mutableListOf() else value.split(",").map { it.trim() }.filter { it.isNotEmpty() }.toMutableList()
             )
         }
     

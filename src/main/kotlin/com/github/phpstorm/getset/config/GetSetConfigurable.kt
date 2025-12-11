@@ -17,15 +17,11 @@ class GetSetConfigurable : Configurable {
     
     private var configPanel: JPanel? = null
     private var enabledCheckBox: JBCheckBox? = null
-    private var getterPrefixTable: JBTable? = null
-    private var setterPrefixTable: JBTable? = null
-    private var getterSuffixTable: JBTable? = null
-    private var setterSuffixTable: JBTable? = null
+    private var getterPatternTable: JBTable? = null
+    private var setterPatternTable: JBTable? = null
     
-    private var getterPrefixModel: DefaultTableModel? = null
-    private var setterPrefixModel: DefaultTableModel? = null
-    private var getterSuffixModel: DefaultTableModel? = null
-    private var setterSuffixModel: DefaultTableModel? = null
+    private var getterPatternModel: DefaultTableModel? = null
+    private var setterPatternModel: DefaultTableModel? = null
     
     override fun getDisplayName(): String {
         return "Get/Set Highlighter"
@@ -42,25 +38,20 @@ class GetSetConfigurable : Configurable {
         enabledCheckBox = JBCheckBox("启用 Get/Set 方法高亮", config.enabled)
         
         // 创建表格模型
-        getterPrefixModel = createTableModel(config.getterPrefixes)
-        setterPrefixModel = createTableModel(config.setterPrefixes)
-        getterSuffixModel = createTableModel(config.getterSuffixes)
-        setterSuffixModel = createTableModel(config.setterSuffixes)
+        getterPatternModel = createTableModel(config.getterPatterns)
+        setterPatternModel = createTableModel(config.setterPatterns)
         
         // 创建表格
-        getterPrefixTable = createTable(getterPrefixModel!!, "Getter 前缀")
-        setterPrefixTable = createTable(setterPrefixModel!!, "Setter 前缀")
-        getterSuffixTable = createTable(getterSuffixModel!!, "Getter 后缀")
-        setterSuffixTable = createTable(setterSuffixModel!!, "Setter 后缀")
+        getterPatternTable = createTable(getterPatternModel!!, "Getter 模式（支持 *）")
+        setterPatternTable = createTable(setterPatternModel!!, "Setter 模式（支持 *）")
         
         // 构建表单
+        val enabledCheckBoxLocal = requireNotNull(enabledCheckBox) { "enabledCheckBox should be initialized" }
         val formBuilder = FormBuilder.createFormBuilder()
-            .addComponent(enabledCheckBox)
+            .addComponent(enabledCheckBoxLocal)
             .addSeparator()
-            .addLabeledComponent("Getter 方法前缀:", createTablePanel(getterPrefixTable!!, getterPrefixModel!!))
-            .addLabeledComponent("Setter 方法前缀:", createTablePanel(setterPrefixTable!!, setterPrefixModel!!))
-            .addLabeledComponent("Getter 方法后缀:", createTablePanel(getterSuffixTable!!, getterSuffixModel!!))
-            .addLabeledComponent("Setter 方法后缀:", createTablePanel(setterSuffixTable!!, setterSuffixModel!!))
+            .addLabeledComponent("Getter 方法模式:", createTablePanel(getterPatternTable!!, getterPatternModel!!))
+            .addLabeledComponent("Setter 方法模式:", createTablePanel(setterPatternTable!!, setterPatternModel!!))
             .addComponentFillVertically(JPanel(), 0)
         
         configPanel!!.add(formBuilder.panel, BorderLayout.CENTER)
@@ -144,19 +135,11 @@ class GetSetConfigurable : Configurable {
             return true
         }
         
-        if (!listsEqual(getTableValues(getterPrefixModel!!), currentConfig.getterPrefixes)) {
+        if (!listsEqual(getTableValues(getterPatternModel!!), currentConfig.getterPatterns)) {
             return true
         }
         
-        if (!listsEqual(getTableValues(setterPrefixModel!!), currentConfig.setterPrefixes)) {
-            return true
-        }
-        
-        if (!listsEqual(getTableValues(getterSuffixModel!!), currentConfig.getterSuffixes)) {
-            return true
-        }
-        
-        if (!listsEqual(getTableValues(setterSuffixModel!!), currentConfig.setterSuffixes)) {
+        if (!listsEqual(getTableValues(setterPatternModel!!), currentConfig.setterPatterns)) {
             return true
         }
         
@@ -171,10 +154,8 @@ class GetSetConfigurable : Configurable {
         val configService = GetSetConfigService.getInstance()
         
         val newConfig = GetSetConfig(
-            getterPrefixes = getTableValues(getterPrefixModel!!),
-            setterPrefixes = getTableValues(setterPrefixModel!!),
-            getterSuffixes = getTableValues(getterSuffixModel!!),
-            setterSuffixes = getTableValues(setterSuffixModel!!),
+            getterPatterns = getTableValues(getterPatternModel!!),
+            setterPatterns = getTableValues(setterPatternModel!!),
             enabled = enabledCheckBox!!.isSelected
         )
         
@@ -189,10 +170,8 @@ class GetSetConfigurable : Configurable {
         val config = configService.getConfig()
         
         enabledCheckBox!!.isSelected = config.enabled
-        updateTableModel(getterPrefixModel!!, config.getterPrefixes)
-        updateTableModel(setterPrefixModel!!, config.setterPrefixes)
-        updateTableModel(getterSuffixModel!!, config.getterSuffixes)
-        updateTableModel(setterSuffixModel!!, config.setterSuffixes)
+        updateTableModel(getterPatternModel!!, config.getterPatterns)
+        updateTableModel(setterPatternModel!!, config.setterPatterns)
     }
     
     /**
