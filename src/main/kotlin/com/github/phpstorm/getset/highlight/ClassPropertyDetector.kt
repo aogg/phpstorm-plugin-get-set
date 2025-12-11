@@ -21,18 +21,36 @@ object ClassPropertyDetector {
      */
     fun hasProperty(phpClass: PhpClass?, propertyName: String): Boolean {
         if (phpClass == null || propertyName.isBlank()) {
+            ProjectLogger.debug(
+                ClassPropertyDetector::class.java,
+                "hasProperty: phpClass 为空或 propertyName 为空: $propertyName"
+            )
             return false
         }
         
         // 生成可能的属性名变体（驼峰和蛇形）
         val propertyVariants = generatePropertyVariants(propertyName)
+        ProjectLogger.debug(
+            ClassPropertyDetector::class.java,
+            "hasProperty: 查找属性 $propertyName, 变体: $propertyVariants, 在类 ${phpClass.name}"
+        )
         
         // 检查类的字段
         val fields = phpClass.fields
+        ProjectLogger.debug(
+            ClassPropertyDetector::class.java,
+            "hasProperty: 类 ${phpClass.name} 共有 ${fields.size} 个字段"
+        )
+        
         for (field in fields) {
             val fieldName = field.name ?: continue
             // 移除 $ 符号
             val cleanFieldName = fieldName.removePrefix("$")
+            
+            ProjectLogger.debug(
+                ClassPropertyDetector::class.java,
+                "hasProperty: 检查字段: $cleanFieldName"
+            )
             
             if (propertyVariants.any { variant -> 
                 variant.equals(cleanFieldName, ignoreCase = true) 

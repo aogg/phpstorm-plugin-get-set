@@ -41,44 +41,78 @@ object GetSetMethodDetector {
         
         // 检查 getter 方法
         if (config.isGetterMethod(methodName)) {
-            // 提取属性名
-            val propertyName = extractPropertyNameFromGetter(methodName, config.getterPatterns)
-            if (propertyName != null) {
-                // 检查类中是否存在该属性
-                if (ClassPropertyDetector.hasProperty(containingClass, propertyName)) {
-                    ProjectLogger.info(
-                        GetSetMethodDetector::class.java,
-                        "方法检测: $methodName -> GETTER (属性: $propertyName)"
-                    )
-                    return MethodType.GETTER
-                } else {
+            ProjectLogger.debug(
+                GetSetMethodDetector::class.java,
+                "方法匹配 getter 规则: $methodName, 模式列表: ${config.getterPatterns}"
+            )
+            
+            // 遍历所有模式，找到第一个匹配且能找到对应属性的模式
+            for (pattern in config.getterPatterns) {
+                val propertyName = extractPropertyName(methodName, pattern)
+                if (propertyName != null) {
                     ProjectLogger.debug(
                         GetSetMethodDetector::class.java,
-                        "方法检测: $methodName 匹配规则但类中无对应属性"
+                        "模式 $pattern 提取到属性名: $propertyName, 开始检查类中是否存在该属性"
                     )
+                    
+                    // 检查类中是否存在该属性
+                    if (ClassPropertyDetector.hasProperty(containingClass, propertyName)) {
+                        ProjectLogger.info(
+                            GetSetMethodDetector::class.java,
+                            "方法检测: $methodName -> GETTER (模式: $pattern, 属性: $propertyName)"
+                        )
+                        return MethodType.GETTER
+                    } else {
+                        ProjectLogger.debug(
+                            GetSetMethodDetector::class.java,
+                            "模式 $pattern 提取的属性 $propertyName 在类中不存在，继续尝试下一个模式"
+                        )
+                    }
                 }
             }
+            
+            ProjectLogger.debug(
+                GetSetMethodDetector::class.java,
+                "方法检测: $methodName 匹配规则但所有模式都无法找到对应属性"
+            )
         }
         
         // 检查 setter 方法
         if (config.isSetterMethod(methodName)) {
-            // 提取属性名
-            val propertyName = extractPropertyNameFromSetter(methodName, config.setterPatterns)
-            if (propertyName != null) {
-                // 检查类中是否存在该属性
-                if (ClassPropertyDetector.hasProperty(containingClass, propertyName)) {
-                    ProjectLogger.info(
-                        GetSetMethodDetector::class.java,
-                        "方法检测: $methodName -> SETTER (属性: $propertyName)"
-                    )
-                    return MethodType.SETTER
-                } else {
+            ProjectLogger.debug(
+                GetSetMethodDetector::class.java,
+                "方法匹配 setter 规则: $methodName, 模式列表: ${config.setterPatterns}"
+            )
+            
+            // 遍历所有模式，找到第一个匹配且能找到对应属性的模式
+            for (pattern in config.setterPatterns) {
+                val propertyName = extractPropertyName(methodName, pattern)
+                if (propertyName != null) {
                     ProjectLogger.debug(
                         GetSetMethodDetector::class.java,
-                        "方法检测: $methodName 匹配规则但类中无对应属性"
+                        "模式 $pattern 提取到属性名: $propertyName, 开始检查类中是否存在该属性"
                     )
+                    
+                    // 检查类中是否存在该属性
+                    if (ClassPropertyDetector.hasProperty(containingClass, propertyName)) {
+                        ProjectLogger.info(
+                            GetSetMethodDetector::class.java,
+                            "方法检测: $methodName -> SETTER (模式: $pattern, 属性: $propertyName)"
+                        )
+                        return MethodType.SETTER
+                    } else {
+                        ProjectLogger.debug(
+                            GetSetMethodDetector::class.java,
+                            "模式 $pattern 提取的属性 $propertyName 在类中不存在，继续尝试下一个模式"
+                        )
+                    }
                 }
             }
+            
+            ProjectLogger.debug(
+                GetSetMethodDetector::class.java,
+                "方法检测: $methodName 匹配规则但所有模式都无法找到对应属性"
+            )
         }
         
         return MethodType.NONE
@@ -125,6 +159,7 @@ object GetSetMethodDetector {
      * - getCacheKey() + get* -> cacheKey
      * - getCacheKey() + getCache* -> key
      * - getCacheAttr() + get*Attr -> cache
+     * - getCacheLinuxPath() + getCache* -> linuxPath
      */
     private fun extractPropertyName(methodName: String, pattern: String): String? {
         // 将模式转换为正则表达式
@@ -145,7 +180,14 @@ object GetSetMethodDetector {
         if (extracted.isBlank()) return null
         
         // 转换为属性名格式（首字母小写）
-        return extracted.replaceFirstChar { it.lowercaseChar() }
+        val propertyName = extracted.replaceFirstChar { it.lowercaseChar() }
+        
+        ProjectLogger.debug(
+            GetSetMethodDetector::class.java,
+            "属性名提取: 方法名=$methodName, 模式=$pattern, 提取=$extracted, 属性名=$propertyName"
+        )
+        
+        return propertyName
     }
     
     /**

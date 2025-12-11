@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.github.phpstorm.get-set-highlighter</id>
     <name>Get/Set Method Highlighter</name>
-    <version>1.0.8</version>
+    <version>1.0.10</version>
     <vendor email="support@example.com" url="https://github.com">GitHub</vendor>
 
     <description><![CDATA[
@@ -17,6 +17,14 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    1.0.10 - 修复模式匹配逻辑
+    - 修复模式匹配问题：现在会遍历所有模式，找到第一个匹配且能找到对应属性的模式
+    - 修复 getCache* 等模式无法正确匹配的问题（如 getCacheLinuxPath 现在能正确匹配到 linuxPath 属性）
+    
+    1.0.9 - 调试日志增强
+    - 添加详细的调试日志，帮助排查 getCache* 等模式匹配问题
+    - 增强属性检测的日志输出，便于定位问题
+    
     1.0.8 - 项目级配置缓存优化
     - 添加配置缓存机制，避免重复读取配置文件
     - 只在首次加载或文件修改时读取配置文件
