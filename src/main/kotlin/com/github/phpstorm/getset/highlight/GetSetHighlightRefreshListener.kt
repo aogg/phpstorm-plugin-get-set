@@ -26,8 +26,8 @@ import java.util.concurrent.atomic.AtomicLong
 class GetSetHighlightRefreshListener : FileEditorManagerListener, FileDocumentManagerListener, DocumentListener {
     
     companion object {
-        // 防抖延迟时间（毫秒）
-        private const val DEBOUNCE_DELAY_MS = 300L
+        // 防抖延迟时间（毫秒）- 减少延迟以提高响应速度
+        private const val DEBOUNCE_DELAY_MS = 150L
     }
     
     // 用于防抖的时间戳记录
@@ -200,15 +200,19 @@ class GetSetHighlightRefreshListener : FileEditorManagerListener, FileDocumentMa
                 return
             }
             
+            // 确保 PSI 树已提交（同步）
+            val psiDocumentManager = PsiDocumentManager.getInstance(project)
+            psiDocumentManager.commitDocument(document)
+            
             // 获取 PSI 文件
-            val psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document) ?: run {
+            val psiFile = psiDocumentManager.getPsiFile(document) ?: run {
                 ProjectLogger.warn(GetSetHighlightRefreshListener::class.java, "无法获取 PSI 文件: ${file.path}")
                 return
             }
             
             ProjectLogger.info(GetSetHighlightRefreshListener::class.java, "刷新高亮: ${file.path}")
             
-            // 针对特定文件重新分析
+            // 针对特定文件重新分析，使用 restart 确保立即刷新
             val daemonCodeAnalyzer = DaemonCodeAnalyzer.getInstance(project)
             daemonCodeAnalyzer.restart(psiFile)
             

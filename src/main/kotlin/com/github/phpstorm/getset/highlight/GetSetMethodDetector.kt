@@ -33,6 +33,11 @@ object GetSetMethodDetector {
         // 获取方法所在的类
         val containingClass = method.containingClass
         
+        // 如果类不存在，说明 PSI 树可能还未完全构建，暂时跳过
+        if (containingClass == null) {
+            return MethodType.NONE
+        }
+        
         // 检查 getter 方法
         if (config.isGetterMethod(methodName)) {
             // 提取属性名
@@ -46,7 +51,7 @@ object GetSetMethodDetector {
                     )
                     return MethodType.GETTER
                 } else {
-                    ProjectLogger.info(
+                    ProjectLogger.debug(
                         GetSetMethodDetector::class.java,
                         "方法检测: $methodName 匹配规则但类中无对应属性"
                     )
@@ -67,7 +72,7 @@ object GetSetMethodDetector {
                     )
                     return MethodType.SETTER
                 } else {
-                    ProjectLogger.info(
+                    ProjectLogger.debug(
                         GetSetMethodDetector::class.java,
                         "方法检测: $methodName 匹配规则但类中无对应属性"
                     )

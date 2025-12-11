@@ -5,12 +5,11 @@ import com.github.phpstorm.getset.util.ProjectLogger
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
-import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
+import com.intellij.psi.util.PsiTreeUtil
 import com.jetbrains.php.lang.psi.elements.Method
-import java.awt.Color
-import java.awt.Font
+import com.jetbrains.php.lang.psi.elements.PhpClass
 
 /**
  * Get/Set 注解器
@@ -32,6 +31,13 @@ class GetSetAnnotator : Annotator {
             return
         }
         
+        // 确保 PSI 树已完全构建
+        val containingClass = element.containingClass
+        if (containingClass == null) {
+            // PSI 树可能还未完全构建，跳过此次检测
+            return
+        }
+        
         // 检测方法类型
         val methodType = GetSetMethodDetector.detectMethodType(element)
         
@@ -39,16 +45,13 @@ class GetSetAnnotator : Annotator {
             GetSetMethodDetector.MethodType.GETTER -> {
                 // 高亮 getter 方法名 - 使用浅绿色加粗
                 val nameRange: TextRange = element.nameIdentifier?.textRange ?: element.textRange
-                val textAttributes = TextAttributes(
-                    Color(0x90EE90), // 浅绿色前景色 (#90EE90)
-                    null, // 无背景色
-                    null, // 无效果颜色
-                    null, // 无边框
-                    Font.BOLD // 粗体
-                )
-                // 使用 enforcedTextAttributes 来强制应用颜色
-                holder.newAnnotation(HighlightSeverity.INFORMATION, "Getter method")
+                val textAttributes = GetSetHighlighter.getGetterTextAttributes()
+                
+                // 使用 WEAK_WARNING 优先级，确保高亮可见且不会被覆盖
+                // 同时使用 enforcedTextAttributes 强制应用颜色
+                holder.newAnnotation(HighlightSeverity.WEAK_WARNING, "Getter method")
                     .range(nameRange)
+                    .textAttributes(GetSetHighlighter.GETTER_METHOD_KEY)
                     .enforcedTextAttributes(textAttributes)
                     .create()
                 
@@ -58,16 +61,13 @@ class GetSetAnnotator : Annotator {
             GetSetMethodDetector.MethodType.SETTER -> {
                 // 高亮 setter 方法名 - 使用浅绿色加粗
                 val nameRange: TextRange = element.nameIdentifier?.textRange ?: element.textRange
-                val textAttributes = TextAttributes(
-                    Color(0x90EE90), // 浅绿色前景色 (#90EE90)
-                    null, // 无背景色
-                    null, // 无效果颜色
-                    null, // 无边框
-                    Font.BOLD // 粗体
-                )
-                // 使用 enforcedTextAttributes 来强制应用颜色
-                holder.newAnnotation(HighlightSeverity.INFORMATION, "Setter method")
+                val textAttributes = GetSetHighlighter.getSetterTextAttributes()
+                
+                // 使用 WEAK_WARNING 优先级，确保高亮可见且不会被覆盖
+                // 同时使用 enforcedTextAttributes 强制应用颜色
+                holder.newAnnotation(HighlightSeverity.WEAK_WARNING, "Setter method")
                     .range(nameRange)
+                    .textAttributes(GetSetHighlighter.SETTER_METHOD_KEY)
                     .enforcedTextAttributes(textAttributes)
                     .create()
                 
