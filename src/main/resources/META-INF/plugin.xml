@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.github.phpstorm.get-set-highlighter</id>
     <name>Get/Set Method Highlighter</name>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <vendor email="support@example.com" url="https://github.com">GitHub</vendor>
 
     <description><![CDATA[
@@ -9,12 +9,17 @@
     
     功能特性：
     - 自动识别并高亮 getter/setter 方法
-    - 支持自定义多个前缀和后缀
+    - 支持通配符模式配置（get*、getCache*、get*Attr 等）
+    - 明显的颜色高亮（蓝色 getter，绿色 setter）
     - 可配置的高亮样式
     - 实时更新，无需重启 IDE
     ]]></description>
 
     <change-notes><![CDATA[
+    1.0.1 - 修复高亮显示问题
+    - 修复高亮颜色不明显的问题，使用蓝色（getter）和绿色（setter）加粗显示
+    - 支持通配符模式配置（get*、getCache*、get*Attr 等）
+    
     1.0.0 - 初始版本
     - 支持自动高亮 getter/setter 方法
     - 支持自定义前缀和后缀配置

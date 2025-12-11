@@ -45,9 +45,10 @@ class GetSetAnnotator : Annotator {
                     null, // 无边框
                     Font.BOLD // 粗体
                 )
+                // 使用 enforcedTextAttributes 来强制应用颜色
                 holder.newAnnotation(HighlightSeverity.INFORMATION, "Getter method")
                     .range(nameRange)
-                    .textAttributes(textAttributes)
+                    .enforcedTextAttributes(textAttributes)
                     .create()
             }
             
@@ -61,9 +62,10 @@ class GetSetAnnotator : Annotator {
                     null, // 无边框
                     Font.BOLD // 粗体
                 )
+                // 使用 enforcedTextAttributes 来强制应用颜色
                 holder.newAnnotation(HighlightSeverity.INFORMATION, "Setter method")
                     .range(nameRange)
-                    .textAttributes(textAttributes)
+                    .enforcedTextAttributes(textAttributes)
                     .create()
             }
             
