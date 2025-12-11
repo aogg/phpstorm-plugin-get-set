@@ -37,10 +37,10 @@ class GetSetAnnotator : Annotator {
         
         when (methodType) {
             GetSetMethodDetector.MethodType.GETTER -> {
-                // 高亮 getter 方法名 - 使用蓝色加粗
+                // 高亮 getter 方法名 - 使用浅绿色加粗
                 val nameRange: TextRange = element.nameIdentifier?.textRange ?: element.textRange
                 val textAttributes = TextAttributes(
-                    Color(0x2196F3), // 蓝色前景色
+                    Color(0x90EE90), // 浅绿色前景色 (#90EE90)
                     null, // 无背景色
                     null, // 无效果颜色
                     null, // 无边框
@@ -56,10 +56,10 @@ class GetSetAnnotator : Annotator {
             }
             
             GetSetMethodDetector.MethodType.SETTER -> {
-                // 高亮 setter 方法名 - 使用绿色加粗
+                // 高亮 setter 方法名 - 使用浅绿色加粗
                 val nameRange: TextRange = element.nameIdentifier?.textRange ?: element.textRange
                 val textAttributes = TextAttributes(
-                    Color(0x4CAF50), // 绿色前景色
+                    Color(0x90EE90), // 浅绿色前景色 (#90EE90)
                     null, // 无背景色
                     null, // 无效果颜色
                     null, // 无边框
