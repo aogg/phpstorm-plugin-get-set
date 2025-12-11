@@ -4,16 +4,31 @@ import com.github.phpstorm.getset.util.ProjectLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * 项目级配置服务
  * 读取项目目录下的 .plugin/get-set-highlighter/config.json 配置文件
+ * 使用缓存机制，避免重复读取文件
  */
 object GetSetProjectConfigService {
     
     private const val PLUGIN_DIR_NAME = ".plugin"
     private const val PLUGIN_NAME = "get-set-highlighter"
     private const val CONFIG_FILE_NAME = "config.json"
+    
+    /**
+     * 配置缓存：项目路径 -> (配置, 文件最后修改时间)
+     */
+    private val configCache = ConcurrentHashMap<String, CachedConfig>()
+    
+    /**
+     * 缓存的数据类
+     */
+    private data class CachedConfig(
+        val config: GetSetProjectConfig?,
+        val lastModified: Long
+    )
     
     /**
      * 获取项目级配置
@@ -25,17 +40,38 @@ object GetSetProjectConfigService {
         
         try {
             val configFile = getConfigFile(targetProject) ?: return null
+            val projectPath = targetProject.basePath ?: return null
             
+            // 检查文件是否存在
             if (!configFile.exists() || !configFile.isFile) {
-                ProjectLogger.debug(
-                    GetSetProjectConfigService::class.java,
-                    "项目级配置文件不存在: ${configFile.absolutePath}"
-                )
+                // 缓存"不存在"的结果，避免重复检查
+                val cached = configCache[projectPath]
+                if (cached == null) {
+                    // 首次检查，记录到缓存
+                    configCache[projectPath] = CachedConfig(null, 0)
+                    ProjectLogger.debug(
+                        GetSetProjectConfigService::class.java,
+                        "项目级配置文件不存在: ${configFile.absolutePath}"
+                    )
+                }
                 return null
             }
             
+            // 获取文件最后修改时间
+            val lastModified = configFile.lastModified()
+            
+            // 检查缓存
+            val cached = configCache[projectPath]
+            if (cached != null && cached.lastModified == lastModified) {
+                // 缓存有效，直接返回
+                return cached.config
+            }
+            
+            // 文件已修改或首次读取，重新加载
             val jsonContent = configFile.readText(Charsets.UTF_8)
             if (jsonContent.isBlank()) {
+                // 缓存空文件的结果
+                configCache[projectPath] = CachedConfig(null, lastModified)
                 ProjectLogger.debug(
                     GetSetProjectConfigService::class.java,
                     "项目级配置文件为空: ${configFile.absolutePath}"
@@ -44,6 +80,9 @@ object GetSetProjectConfigService {
             }
             
             val config = parseConfig(jsonContent)
+            
+            // 更新缓存
+            configCache[projectPath] = CachedConfig(config, lastModified)
             
             ProjectLogger.info(
                 GetSetProjectConfigService::class.java,
@@ -59,6 +98,23 @@ object GetSetProjectConfigService {
             )
             return null
         }
+    }
+    
+    /**
+     * 清除指定项目的配置缓存（用于文件修改后强制重新加载）
+     */
+    fun clearCache(project: Project?) {
+        val projectPath = project?.basePath
+        if (projectPath != null) {
+            configCache.remove(projectPath)
+        }
+    }
+    
+    /**
+     * 清除所有缓存
+     */
+    fun clearAllCache() {
+        configCache.clear()
     }
     
     /**
