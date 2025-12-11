@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.github.phpstorm.get-set-highlighter</id>
     <name>Get/Set Method Highlighter</name>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <vendor email="support@example.com" url="https://github.com">GitHub</vendor>
 
     <description><![CDATA[
@@ -17,6 +17,12 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    1.0.3 - 修复文件修改和打开时的高亮问题
+    - 添加文档修改监听，文件修改时立即刷新高亮
+    - 优化文件打开时的高亮刷新机制
+    - 添加调试日志，方便排查问题
+    - 使用针对特定文件的刷新方法，提升性能
+    
     1.0.2 - 添加自动刷新功能
     - 文件打开时自动刷新高亮
     - 优化性能，仅处理 PHP 文件
@@ -56,6 +62,9 @@
         
         <!-- 注册文件编辑器管理器监听器（监听文件打开） -->
         <fileEditorManagerListener implementation="com.github.phpstorm.getset.highlight.GetSetHighlightRefreshListener"/>
+        
+        <!-- 注册应用级组件（注册文档监听器） -->
+        <applicationComponent implementation="com.github.phpstorm.getset.highlight.GetSetHighlightComponent"/>
     </extensions>
 
     <actions>
