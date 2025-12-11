@@ -44,16 +44,16 @@ class GetSetHighlightRefreshListener : FileEditorManagerListener, FileDocumentMa
         
         ProjectLogger.info(GetSetHighlightRefreshListener::class.java, "文件打开: ${file.path}")
         
-        // 检查配置是否启用
+        // 从 FileEditorManager 获取项目
+        val project = source.project
+        
+        // 检查配置是否启用（合并全局配置和项目级配置）
         val configService = GetSetConfigService.getInstance()
-        val config = configService.getConfig()
+        val config = configService.getConfig(project)
         if (!config.enabled) {
             ProjectLogger.debug(GetSetHighlightRefreshListener::class.java, "高亮功能已禁用，跳过刷新")
             return
         }
-        
-        // 从 FileEditorManager 获取项目并触发重新分析
-        val project = source.project
         if (!project.isDisposed) {
             // 延迟执行，确保 PSI 树已构建
             ApplicationManager.getApplication().invokeLater({
@@ -79,13 +79,6 @@ class GetSetHighlightRefreshListener : FileEditorManagerListener, FileDocumentMa
         
         ProjectLogger.info(GetSetHighlightRefreshListener::class.java, "文档修改: ${file.path}")
         
-        // 检查配置是否启用
-        val configService = GetSetConfigService.getInstance()
-        val config = configService.getConfig()
-        if (!config.enabled) {
-            return
-        }
-        
         // 找到包含该文件的项目
         val projects = ProjectManager.getInstance().openProjects
         for (project in projects) {
@@ -99,6 +92,13 @@ class GetSetHighlightRefreshListener : FileEditorManagerListener, FileDocumentMa
             
             val fileEditorManager = FileEditorManager.getInstance(project)
             if (fileEditorManager.isFileOpen(file)) {
+                // 检查配置是否启用（合并全局配置和项目级配置）
+                val configService = GetSetConfigService.getInstance()
+                val config = configService.getConfig(project)
+                if (!config.enabled) {
+                    return
+                }
+                
                 // 使用防抖机制，避免频繁刷新
                 scheduleDebouncedRefresh(project, file)
                 break
@@ -154,13 +154,6 @@ class GetSetHighlightRefreshListener : FileEditorManagerListener, FileDocumentMa
         
         ProjectLogger.info(GetSetHighlightRefreshListener::class.java, "文档保存: ${file.path}")
         
-        // 检查配置是否启用
-        val configService = GetSetConfigService.getInstance()
-        val config = configService.getConfig()
-        if (!config.enabled) {
-            return
-        }
-        
         // 找到包含该文件的项目
         val projects = ProjectManager.getInstance().openProjects
         for (project in projects) {
@@ -174,6 +167,13 @@ class GetSetHighlightRefreshListener : FileEditorManagerListener, FileDocumentMa
             
             val fileEditorManager = FileEditorManager.getInstance(project)
             if (fileEditorManager.isFileOpen(file)) {
+                // 检查配置是否启用（合并全局配置和项目级配置）
+                val configService = GetSetConfigService.getInstance()
+                val config = configService.getConfig(project)
+                if (!config.enabled) {
+                    return
+                }
+                
                 // 保存时立即刷新
                 refreshHighlightingForFile(project, file)
                 break

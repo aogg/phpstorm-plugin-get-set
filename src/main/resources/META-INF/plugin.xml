@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.github.phpstorm.get-set-highlighter</id>
     <name>Get/Set Method Highlighter</name>
-    <version>1.0.4</version>
+    <version>1.0.7</version>
     <vendor email="support@example.com" url="https://github.com">GitHub</vendor>
 
     <description><![CDATA[
@@ -17,6 +17,12 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    1.0.7 - 配置持久化和项目级配置支持
+    - 修复配置持久化问题，确保配置在重启后不丢失
+    - 新增项目级配置支持，读取项目目录/.plugin/get-set-highlighter/config.json
+    - 项目级配置会自动合并到全局配置（追加模式，去重）
+    - 支持在项目级配置中覆盖 enabled 字段
+    
     1.0.4 - 项目目录日志功能
     - 日志现在存储在项目目录的 .idea/plugin/Get-Set-Method-Highlighter/logs/ 目录
     - 日志文件按日期命名，方便查看和归档

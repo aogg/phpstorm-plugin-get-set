@@ -23,9 +23,10 @@ class GetSetAnnotator : Annotator {
             return
         }
         
-        // 检查配置是否启用
+        // 检查配置是否启用（合并全局配置和项目级配置）
         val configService = GetSetConfigService.getInstance()
-        val config = configService.getConfig()
+        val project = element.project
+        val config = configService.getConfig(project)
         
         if (!config.enabled) {
             return

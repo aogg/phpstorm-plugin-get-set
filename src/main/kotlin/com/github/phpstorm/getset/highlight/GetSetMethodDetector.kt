@@ -28,7 +28,8 @@ object GetSetMethodDetector {
         val methodName = method.name ?: return MethodType.NONE
         
         val configService = GetSetConfigService.getInstance()
-        val config = configService.getConfig()
+        val project = method.project
+        val config = configService.getConfig(project)
         
         // 获取方法所在的类
         val containingClass = method.containingClass
