@@ -1,0 +1,70 @@
+# PhpStorm Get/Set Highlighter Plugin - Cursor Rules
+
+## 项目概述
+这是一个 IntelliJ Platform 插件项目，用于在 PhpStorm 中高亮显示 PHP 的 getter/setter 方法。
+
+# 对话中计划
+- 1、每次修改记得先删除build/distributions下面的插件包
+- 2、然后每次修改记得重新构建插件包
+- 3、每次构建插件包记得更新插件包的版本号
+- 4、作者官网: https://github.com/aogg
+
+## 技术栈
+- **语言**: Kotlin
+- **平台**: IntelliJ Platform SDK
+- **构建工具**: Gradle (Kotlin DSL)
+- **目标IDE**: PhpStorm 2023.3+
+
+## 代码规范
+
+
+
+### 文件组织
+- 每个功能模块保持单一职责
+
+## 功能特性
+
+### 通配符模式匹配
+- 支持 `*` 通配符匹配任意字符
+- 模式示例: `get*`, `getCache*`, `get*Attr`
+- 匹配不区分大小写
+- 使用正则表达式实现通配符转换
+
+### 配置管理
+- 配置存储在 `getset-highlighter.xml`
+- 支持通过设置界面动态配置
+- 默认模式: `get*`, `is*`, `has*`, `set*`
+
+## 开发注意事项
+
+### 高亮实现
+- 使用 `TextAttributesKey` 定义高亮样式
+- 通过 `AnnotationHolder` 创建高亮注解
+- 确保高亮颜色明显可见（避免灰色）
+
+### 性能优化
+- 方法检测逻辑应高效，避免在大量文件中造成性能问题
+- 使用缓存机制存储编译后的正则表达式（如需要）
+
+### 测试建议
+- 测试各种通配符模式: `get*`, `getCache*`, `get*Attr`
+- 测试大小写不敏感匹配
+- 验证配置持久化功能
+- 检查高亮颜色是否明显
+
+## 构建和部署
+- 使用 `gradlew.bat buildPlugin` 构建插件包
+- 插件包位于 `build/distributions/` 目录
+- 版本号在 `build.gradle.kts` 中定义
+
+## 响应语言
+- 所有回复和注释使用简体中文
+- 代码注释使用中文
+- 用户界面文本使用中文
+
+## 代码审查要点
+- 检查是否有未使用的参数或变量
+- 确保所有配置项都有合理的默认值
+- 验证通配符匹配逻辑的正确性
+- 确保高亮效果明显可见
+
