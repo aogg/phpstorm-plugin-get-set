@@ -203,5 +203,103 @@ object GetSetMethodDetector {
     fun isSetterMethod(method: Method): Boolean {
         return detectMethodType(method) == MethodType.SETTER
     }
+    
+    /**
+     * 检测方法类型并返回匹配的属性名
+     * @return Pair<MethodType, String?> 方法类型和匹配到的属性名（如果匹配）
+     */
+    fun detectMethodTypeWithProperty(method: Method): Pair<MethodType, String?> {
+        val methodName = method.name ?: return Pair(MethodType.NONE, null)
+        
+        val configService = GetSetConfigService.getInstance()
+        val project = method.project
+        val config = configService.getConfig(project)
+        
+        // 获取方法所在的类
+        val containingClass = method.containingClass
+        
+        // 如果类不存在，说明 PSI 树可能还未完全构建，暂时跳过
+        if (containingClass == null) {
+            return Pair(MethodType.NONE, null)
+        }
+        
+        // 检查 getter 方法
+        if (config.isGetterMethod(methodName)) {
+            ProjectLogger.debug(
+                GetSetMethodDetector::class.java,
+                "方法匹配 getter 规则: $methodName, 模式列表: ${config.getterPatterns}"
+            )
+            
+            // 遍历所有模式，找到第一个匹配且能找到对应属性的模式
+            for (pattern in config.getterPatterns) {
+                val propertyName = extractPropertyName(methodName, pattern)
+                if (propertyName != null) {
+                    ProjectLogger.debug(
+                        GetSetMethodDetector::class.java,
+                        "模式 $pattern 提取到属性名: $propertyName, 开始检查类中是否存在该属性"
+                    )
+                    
+                    // 检查类中是否存在该属性
+                    if (ClassPropertyDetector.hasProperty(containingClass, propertyName)) {
+                        ProjectLogger.info(
+                            GetSetMethodDetector::class.java,
+                            "方法检测: $methodName -> GETTER (模式: $pattern, 属性: $propertyName)"
+                        )
+                        return Pair(MethodType.GETTER, propertyName)
+                    } else {
+                        ProjectLogger.debug(
+                            GetSetMethodDetector::class.java,
+                            "模式 $pattern 提取的属性 $propertyName 在类中不存在，继续尝试下一个模式"
+                        )
+                    }
+                }
+            }
+            
+            ProjectLogger.debug(
+                GetSetMethodDetector::class.java,
+                "方法检测: $methodName 匹配规则但所有模式都无法找到对应属性"
+            )
+        }
+        
+        // 检查 setter 方法
+        if (config.isSetterMethod(methodName)) {
+            ProjectLogger.debug(
+                GetSetMethodDetector::class.java,
+                "方法匹配 setter 规则: $methodName, 模式列表: ${config.setterPatterns}"
+            )
+            
+            // 遍历所有模式，找到第一个匹配且能找到对应属性的模式
+            for (pattern in config.setterPatterns) {
+                val propertyName = extractPropertyName(methodName, pattern)
+                if (propertyName != null) {
+                    ProjectLogger.debug(
+                        GetSetMethodDetector::class.java,
+                        "模式 $pattern 提取到属性名: $propertyName, 开始检查类中是否存在该属性"
+                    )
+                    
+                    // 检查类中是否存在该属性
+                    if (ClassPropertyDetector.hasProperty(containingClass, propertyName)) {
+                        ProjectLogger.info(
+                            GetSetMethodDetector::class.java,
+                            "方法检测: $methodName -> SETTER (模式: $pattern, 属性: $propertyName)"
+                        )
+                        return Pair(MethodType.SETTER, propertyName)
+                    } else {
+                        ProjectLogger.debug(
+                            GetSetMethodDetector::class.java,
+                            "模式 $pattern 提取的属性 $propertyName 在类中不存在，继续尝试下一个模式"
+                        )
+                    }
+                }
+            }
+            
+            ProjectLogger.debug(
+                GetSetMethodDetector::class.java,
+                "方法检测: $methodName 匹配规则但所有模式都无法找到对应属性"
+            )
+        }
+        
+        return Pair(MethodType.NONE, null)
+    }
 }
 

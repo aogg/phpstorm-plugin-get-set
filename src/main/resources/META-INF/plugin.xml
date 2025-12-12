@@ -1,22 +1,44 @@
 <idea-plugin>
     <id>com.github.phpstorm.get-set-highlighter</id>
     <name>Get/Set Method Highlighter</name>
-    <version>1.0.10</version>
+    <version>1.0.16</version>
     <vendor email="support@example.com" url="https://github.com">GitHub</vendor>
 
     <description><![CDATA[
     自动高亮类属性的 getter 和 setter 方法。
     
     功能特性：
-    - 自动识别并高亮 getter/setter 方法
+    - 自动识别并在方法上方显示属性名标签
     - 支持通配符模式配置（get*、getCache*、get*Attr 等）
-    - 明显的颜色高亮（蓝色 getter，绿色 setter）
-    - 文件保存和打开时自动刷新高亮
-    - 可配置的高亮样式
+    - 在方法定义行上方显示匹配到的属性名标签
+    - 文件保存和打开时自动刷新标签
+    - 可配置的匹配规则
     - 实时更新，无需重启 IDE
     ]]></description>
 
     <change-notes><![CDATA[
+    1.0.16 - 修复类型转换错误，使用 addInlineElement 显示标签
+    - 修复 ClassCastException 错误，改用 addInlineElement 在行首显示标签
+    - 标签显示在方法定义行的开始位置
+    
+    1.0.15 - 实现方法上方文本标签显示功能
+    - 使用 InlayHintsProvider 和 FactoryInlayHintsCollector 实现文本标签显示
+    - 在方法定义行上方显示匹配到的属性名标签
+    - 使用 addBlockElement 在方法上方添加块级标签
+    
+    1.0.14 - 移除 Annotation 创建，准备实现文本标签显示
+    - 移除 GetSetAnnotator 中的 Annotation 创建代码
+    - 检测逻辑正常工作，但文本标签显示功能需要进一步研究正确的 API 实现方式
+    
+    1.0.13 - 修复 Annotation range 超出元素范围的错误
+    - 修复在方法定义行上方创建 Annotation 时 range 超出元素范围的错误
+    - 改为在方法名标识符范围内创建 Annotation
+    
+    1.0.12 - 将颜色高亮改为方法上方标签显示
+    - 移除颜色高亮功能，改为在方法定义行上方显示属性名标签
+    - 标签显示匹配到的属性名，更直观地展示 getter/setter 方法对应的属性
+    - 使用 InlayHintsProvider 实现标签显示功能
+    
     1.0.10 - 修复模式匹配逻辑
     - 修复模式匹配问题：现在会遍历所有模式，找到第一个匹配且能找到对应属性的模式
     - 修复 getCache* 等模式无法正确匹配的问题（如 getCacheLinuxPath 现在能正确匹配到 linuxPath 属性）
@@ -78,6 +100,9 @@
 
         <!-- 注册注解器 -->
         <annotator language="PHP" implementationClass="com.github.phpstorm.getset.highlight.GetSetAnnotator"/>
+        
+        <!-- 注册行内提示提供器 -->
+        <codeInsight.inlayProvider language="PHP" implementationClass="com.github.phpstorm.getset.highlight.GetSetInlayHintsProvider"/>
         
         <!-- 注册应用级服务 -->
         <applicationService
