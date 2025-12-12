@@ -1,6 +1,7 @@
 package com.github.phpstorm.getset.highlight
 
 import com.github.phpstorm.getset.util.ProjectLogger
+import com.intellij.psi.PsiElement
 import com.jetbrains.php.lang.psi.elements.Field
 import com.jetbrains.php.lang.psi.elements.PhpClass
 import java.util.regex.Pattern
@@ -151,6 +152,104 @@ object ClassPropertyDetector {
         }
         
         return propertyNames
+    }
+    
+    /**
+     * 查找并返回匹配的字段对象
+     * 
+     * @param phpClass PHP 类
+     * @param propertyName 属性名（支持驼峰和蛇形）
+     * @return 匹配的字段对象，如果不存在则返回 null
+     */
+    fun findPropertyField(phpClass: PhpClass?, propertyName: String): Field? {
+        if (phpClass == null || propertyName.isBlank()) {
+            return null
+        }
+        
+        // 生成可能的属性名变体（驼峰和蛇形）
+        val propertyVariants = generatePropertyVariants(propertyName)
+        
+        // 检查类的字段
+        val fields = phpClass.fields
+        
+        for (field in fields) {
+            val fieldName = field.name ?: continue
+            // 移除 $ 符号
+            val cleanFieldName = fieldName.removePrefix("$")
+            
+            if (propertyVariants.any { variant -> 
+                variant.equals(cleanFieldName, ignoreCase = true) 
+            }) {
+                ProjectLogger.info(
+                    ClassPropertyDetector::class.java,
+                    "找到字段属性: $cleanFieldName (匹配: $propertyName) 在类 ${phpClass.name}"
+                )
+                return field
+            }
+        }
+        
+        return null
+    }
+    
+    /**
+     * 查找 @property 注释位置
+     * 
+     * @param phpClass PHP 类
+     * @param propertyName 属性名（支持驼峰和蛇形）
+     * @return @property 注释中的属性名元素，如果不存在则返回 null
+     */
+    fun findPropertyDocComment(phpClass: PhpClass?, propertyName: String): PsiElement? {
+        if (phpClass == null || propertyName.isBlank()) {
+            return null
+        }
+        
+        // 生成可能的属性名变体（驼峰和蛇形）
+        val propertyVariants = generatePropertyVariants(propertyName)
+        
+        // 检查 PHPDoc 中的 @property 注释
+        val docComment = phpClass.docComment ?: return null
+        val docText = docComment.text
+        
+        // 匹配 @property Type $propertyName 格式，并找到对应的文本范围
+        val pattern = Pattern.compile(
+            "@property\\s+[^\\$]+\\$([a-zA-Z_][a-zA-Z0-9_]*)",
+            Pattern.CASE_INSENSITIVE
+        )
+        val matcher = pattern.matcher(docText)
+        
+        while (matcher.find()) {
+            val docPropertyName = matcher.group(1)
+            if (docPropertyName != null && propertyVariants.any { variant -> 
+                variant.equals(docPropertyName, ignoreCase = true) 
+            }) {
+                // 找到匹配的属性名，返回注释元素本身（可以导航到注释）
+                ProjectLogger.info(
+                    ClassPropertyDetector::class.java,
+                    "找到 @property 属性: $docPropertyName (匹配: $propertyName) 在类 ${phpClass.name}"
+                )
+                return docComment
+            }
+        }
+        
+        return null
+    }
+    
+    /**
+     * 查找属性，优先返回字段，如果没有则返回 @property 注释位置
+     * 
+     * @param phpClass PHP 类
+     * @param propertyName 属性名（支持驼峰和蛇形）
+     * @return 可导航的 PsiElement，优先返回字段，如果没有则返回 @property 注释
+     */
+    fun findProperty(phpClass: PhpClass?, propertyName: String): PsiElement? {
+        // 优先查找字段
+        val field = findPropertyField(phpClass, propertyName)
+        if (field != null) {
+            return field
+        }
+        
+        // 如果没有字段，查找 @property 注释
+        return findPropertyDocComment(phpClass, propertyName)
     }
 }
 

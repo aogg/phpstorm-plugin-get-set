@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.github.phpstorm.get-set-highlighter</id>
     <name>Get/Set Method Highlighter</name>
-    <version>1.0.16</version>
+    <version>1.0.18</version>
     <vendor email="support@example.com" url="https://github.com">GitHub</vendor>
 
     <description><![CDATA[
@@ -17,6 +17,17 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    1.0.18 - 修复属性标签显示位置并实现点击跳转功能
+    - 修复属性标签显示位置：将 showAbove 参数设置为 true，确保标签显示在方法上方
+    - 实现点击跳转功能：使用 referenceOnHover 和 FileEditorManager 实现点击属性标签跳转到对应属性
+    - 优先跳转到字段定义，如果没有则跳转到 @property 注释
+    
+    1.0.17 - 修复属性标签显示位置并添加点击跳转功能
+    - 将属性标签从方法左边改为方法上方显示（和无用法提示同一行）
+    - 添加点击跳转功能，点击属性标签可导航到对应的属性字段或 @property 注释
+    - 使用 addBlockElement 替代 addInlineElement 实现方法上方显示
+    - 优先跳转到字段定义，如果没有则跳转到 @property 注释
+    
     1.0.16 - 修复类型转换错误，使用 addInlineElement 显示标签
     - 修复 ClassCastException 错误，改用 addInlineElement 在行首显示标签
     - 标签显示在方法定义行的开始位置
