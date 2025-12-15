@@ -72,11 +72,13 @@ class GetSetInlayHintsProvider : InlayHintsProvider<NoSettings> {
                 val (methodType, propertyName) = GetSetMethodDetector.detectMethodTypeWithProperty(element)
                 
                 if (methodType != GetSetMethodDetector.MethodType.NONE && propertyName != null) {
-                    // 获取方法定义行的起始偏移量
-                    val methodStartOffset = element.textRange.startOffset
+                    // 计算行内提示的插入位置：紧跟方法名之后
+                    val nameIdentifier = element.nameIdentifier
+                    val hintDisplayOffset = nameIdentifier?.textRange?.endOffset
+                        ?: element.textRange.startOffset
                     val document = editor.document
-                    val lineNumber = document.getLineNumber(methodStartOffset)
-                    
+                    val lineNumber = document.getLineNumber(hintDisplayOffset)
+
                     // 查找对应的属性元素（字段或 @property 注释）
                     val propertyElement = ClassPropertyDetector.findProperty(containingClass, propertyName)
                     
@@ -99,19 +101,16 @@ class GetSetInlayHintsProvider : InlayHintsProvider<NoSettings> {
                         factory.smallText(propertyName)
                     }
                     
-                    // 使用 addBlockElement 在方法上方显示标签（和无用法提示同一行）
-                    // showAbove = true 表示显示在方法上方
-                    sink.addBlockElement(
-                        methodStartOffset,
-                        false,
-                        true,  // showAbove = true，显示在方法上方
-                        0,
+                    // 在方法名后直接追加行内提示，跟随前文
+                    sink.addInlineElement(
+                        hintDisplayOffset,
+                        true,
                         presentation
                     )
                     
                     ProjectLogger.debug(
                         GetSetInlayHintsProvider::class.java,
-                        "添加行内提示: 方法 ${element.name} -> 属性 $propertyName 在第 $lineNumber 行，可导航: ${propertyElement != null}"
+                        "添加行内提示: 方法 ${element.name} -> 属性 $propertyName 在第 $lineNumber 行，偏移: $hintDisplayOffset，可导航: ${propertyElement != null}"
                     )
                 }
                 

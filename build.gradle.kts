@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.github.phpstorm"
-version = "1.0.18"
+version = "1.0.22"
 
 repositories {
     mavenCentral()
