@@ -10,6 +10,8 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.jetbrains.php.lang.psi.PhpFile
 import com.jetbrains.php.lang.psi.elements.Method
+import com.intellij.openapi.editor.ex.util.EditorUtil
+import java.awt.Font
 
 /**
  * Get/Set 行内提示提供器
@@ -72,13 +74,17 @@ class GetSetInlayHintsProvider : InlayHintsProvider<NoSettings> {
                 val (methodType, propertyName) = GetSetMethodDetector.detectMethodTypeWithProperty(element)
                 
                 if (methodType != GetSetMethodDetector.MethodType.NONE && propertyName != null) {
-                    // 计算行内提示的插入位置：紧跟方法名之后
-                    val nameIdentifier = element.nameIdentifier
-                    val hintDisplayOffset = nameIdentifier?.textRange?.endOffset
-                        ?: element.textRange.startOffset
+                    // 计算提示对齐位置：方法所在行首个非空字符（缩进后第一列）
                     val document = editor.document
-                    val lineNumber = document.getLineNumber(hintDisplayOffset)
-
+                    val methodStartOffset = element.textRange.startOffset
+                    val lineNumber = document.getLineNumber(methodStartOffset)
+                    val lineStartOffset = document.getLineStartOffset(lineNumber)
+                    val lineEndOffset = document.getLineEndOffset(lineNumber)
+                    val lineText = document.charsSequence.subSequence(lineStartOffset, lineEndOffset)
+                    val firstNonSpaceOffset = lineText.indexOfFirst { !it.isWhitespace() }.let {
+                        if (it >= 0) lineStartOffset + it else lineStartOffset
+                    }
+                    val hintDisplayOffset = (firstNonSpaceOffset)
                     // 查找对应的属性元素（字段或 @property 注释）
                     val propertyElement = ClassPropertyDetector.findProperty(containingClass, propertyName)
                     
@@ -100,12 +106,25 @@ class GetSetInlayHintsProvider : InlayHintsProvider<NoSettings> {
                         // 如果找不到属性，创建普通文本
                         factory.smallText(propertyName)
                     }
+
+                    // 计算左边距（按列转为像素）
+                    val indentColumns = editor.offsetToLogicalPosition(firstNonSpaceOffset).column
+                    val spaceWidthPx = EditorUtil.getSpaceWidth(Font.PLAIN, editor)
+                    val paddedPresentation = factory.inset(
+                        presentation,
+                        left = indentColumns * spaceWidthPx,
+                        right = 0,
+                        top = 0,
+                        down = 0
+                    )
                     
-                    // 在方法名后直接追加行内提示，跟随前文
-                    sink.addInlineElement(
+                    // 在方法上方对齐到首个非空字符
+                    sink.addBlockElement(
                         hintDisplayOffset,
+                        true,  // 关联前置文本以使用精确水平偏移
                         true,
-                        presentation
+                        0,  // 垂直偏移（0 表示和方法行紧挨着）
+                        paddedPresentation
                     )
                     
                     ProjectLogger.debug(
