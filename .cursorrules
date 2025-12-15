@@ -7,6 +7,7 @@
 - 找代码不要找$env:USERPROFILE和%USERPROFILE%里的东西
 - 当前编辑器是windows环境
 - 要访问中国里国外网络要注意配置代理http://localhost_alpine:8899
+- 要访问github.com要注意配置代理https://ghproxy.com/https://github.com/
 
 # 对话中计划
 - 每次修改记得自动重新构建插件包，不用问我要不要构建
